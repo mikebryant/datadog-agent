@@ -63,7 +63,7 @@ func dogstatsdReplay() error {
 
 	// TODO: tagger state probably belogs in the replay file anyways.
 	// depth should be configurable....
-	// reader, e := replay.NewTrafficCaptureReader(dsdReplayFilePath, dsdTaggerFilePath)
+	// reader, e := debug.NewTrafficCaptureReader(dsdReplayFilePath, dsdTaggerFilePath)
 	depth := 10
 	reader, err := replay.NewTrafficCaptureReader(dsdReplayFilePath, depth)
 	if reader != nil {
@@ -71,7 +71,7 @@ func dogstatsdReplay() error {
 	}
 
 	if err != nil {
-		return err
+		return e
 	}
 
 	addr, err := net.ResolveUnixAddr("unixgram", s)
