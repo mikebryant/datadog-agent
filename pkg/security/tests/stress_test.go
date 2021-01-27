@@ -10,8 +10,6 @@ package tests
 import (
 	"flag"
 	"fmt"
-	"github.com/DataDog/datadog-agent/pkg/security/probe"
-	"github.com/cihub/seelog"
 	"os"
 	"os/exec"
 	"path"
@@ -19,6 +17,9 @@ import (
 	"testing"
 	"time"
 
+	"github.com/cihub/seelog"
+
+	"github.com/DataDog/datadog-agent/pkg/security/probe"
 	"github.com/DataDog/datadog-agent/pkg/security/rules"
 )
 
@@ -348,7 +349,7 @@ func BenchmarkERPCDentryResolutionSegment(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	if err := resolver.Start(); err != nil {
+	if err := resolver.Start(test.probe); err != nil {
 		b.Fatal(err)
 	}
 	name, err := resolver.GetNameFromERPC(event.Open.File.MountID, event.Open.File.Inode, event.Open.File.PathID)
@@ -407,7 +408,7 @@ func BenchmarkERPCDentryResolutionPath(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	if err := resolver.Start(); err != nil {
+	if err := resolver.Start(test.probe); err != nil {
 		b.Fatal(err)
 	}
 	f, err := resolver.ResolveFromERPC(event.Open.File.MountID, event.Open.File.Inode, event.Open.File.PathID)
@@ -466,7 +467,7 @@ func BenchmarkMapDentryResolutionSegment(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	if err := resolver.Start(); err != nil {
+	if err := resolver.Start(test.probe); err != nil {
 		b.Fatal(err)
 	}
 	name, err := resolver.GetNameFromMap(event.Open.File.MountID, event.Open.File.Inode, event.Open.File.PathID)
@@ -525,7 +526,7 @@ func BenchmarkMapDentryResolutionPath(b *testing.B) {
 		b.Fatal(err)
 	}
 
-	if err := resolver.Start(); err != nil {
+	if err := resolver.Start(test.probe); err != nil {
 		b.Fatal(err)
 	}
 	f, err := resolver.ResolveFromMap(event.Open.File.MountID, event.Open.File.Inode, event.Open.File.PathID)

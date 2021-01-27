@@ -46,6 +46,15 @@ var (
 	// Tags: -
 	MetricConcurrentSyscall = newRuntimeMetric(".concurrent_syscalls")
 
+	// Dentry Resolver metrics
+
+	// MetricDentryResolverHits is the counter of successful dentry resolution
+	// Tags: cache, kernel_maps
+	MetricDentryResolverHits = newRuntimeMetric(".dentry_resolver.hits")
+	// MetricDentryResolverMiss is the counter of unsuccessful dentry resolution
+	// Tags: cache, kernel_maps
+	MetricDentryResolverMiss = newRuntimeMetric(".dentry_resolver.miss")
+
 	// Perf buffer metrics
 
 	// MetricPerfBufferLostWrite is the name of the metric used to count the number of lost events, as reported by a
@@ -106,16 +115,31 @@ var (
 	// MetricRuleSetLoaded is the name of the metric used to report that a new ruleset was loaded
 	// Tags: -
 	MetricRuleSetLoaded = newRuntimeMetric(".ruleset_loaded")
-	// MetricForkBomb is the name of the metric used to report the number of processes that crossed the fork bomb
-	// threshold. Tags: -
-	MetricForkBomb = newRuntimeMetric(".fork_bomb")
 
 	// Security Agent metrics
 
-	// MetricsSecurityAgentRuntimeRunning is reported when the security agent `Runtime` feature is enabled
-	MetricsSecurityAgentRuntimeRunning = newAgentMetric(".runtime.running")
-	// MetricsSecurityAgentFIMRunning is reported when the security agent `FIM` feature is enabled
-	MetricsSecurityAgentFIMRunning = newAgentMetric(".fim.running")
+	// MetricSecurityAgentRuntimeRunning is reported when the security agent `Runtime` feature is enabled
+	MetricSecurityAgentRuntimeRunning = newAgentMetric(".runtime.running")
+	// MetricSecurityAgentFIMRunning is reported when the security agent `FIM` feature is enabled
+	MetricSecurityAgentFIMRunning = newAgentMetric(".fim.running")
+)
+
+var (
+	// CacheTag is assigned to metrics related to userspace cache
+	CacheTag = "type:cache"
+	// KernelMapsTag is assigned to metrics related to eBPF kernel maps
+	KernelMapsTag = "type:kernel_maps"
+	// ProcFSTag is assigned to metrics related to /proc fallbacks
+	ProcFSTag = "type:procfs"
+	// ERPCTag is assigned to metrics related to eRPC
+	ERPCTag = "type:erpc"
+
+	// SegmentResolutionTag is assigned to metrics related to the resolution of a segment
+	SegmentResolutionTag = "resolution:segment"
+	// ParentResolutionTag is assigned to metrics related to the resolution of a parent
+	ParentResolutionTag = "resolution:parent"
+	// PathResolutionTag is assigned to metrics related to the resolution of a path
+	PathResolutionTag = "resolution:path"
 )
 
 func newRuntimeMetric(name string) string {
