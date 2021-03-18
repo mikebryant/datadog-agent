@@ -11,11 +11,19 @@ import (
 // copy of aggregator.MetricSamplePoolBatchSize to avoid cycling import
 const sampleBatchSize = 32
 
+<<<<<<< HEAD:pkg/dogstatsd/packets/assembler_test.go
 func buildPacketAssembler() (*Assembler, chan Packets) {
 	out := make(chan Packets, 16)
 	psb := NewBuffer(1, 1*time.Hour, out)
 	pp := NewPool(sampleBatchSize)
 	pb := NewAssembler(100*time.Millisecond, psb, NewPoolManager(pp), UDP)
+=======
+func buildPacketAssembler() (*PacketAssembler, chan Packets) {
+	out := make(chan Packets, 16)
+	psb := NewPacketsBuffer(1, 1*time.Hour, out)
+	pp := NewPacketPool(sampleBatchSize)
+	pb := NewPacketAssembler(100*time.Millisecond, psb, NewPoolManager(pp))
+>>>>>>> 0dfee05a2 ([dogstatsd] packets: fix bugs and add unit tests for pool manager.):pkg/dogstatsd/packets/packet_assembler_test.go
 	return pb, out
 }
 
