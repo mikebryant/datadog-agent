@@ -99,6 +99,7 @@ func AllTailRoutes() []manager.TailCallRoute {
 	var routes []manager.TailCallRoute
 
 	routes = append(routes, getExecTailCallRoutes()...)
+	routes = append(routes, getDentryResolverTailCallRoutes()...)
 
 	return routes
 }
