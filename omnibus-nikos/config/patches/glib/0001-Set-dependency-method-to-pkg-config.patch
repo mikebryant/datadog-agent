@@ -1,0 +1,25 @@
+From 987b6f97b000bb9eac88e8c6686576a001ce6cf7 Mon Sep 17 00:00:00 2001
+From: Isabelle Sauve <isabelle.sauve@datadoghq.com>
+Date: Wed, 24 Mar 2021 00:35:50 -0400
+Subject: [PATCH] Set dependency method to pkg-config
+
+---
+ meson.build | 2 +-
+ 1 file changed, 1 insertion(+), 1 deletion(-)
+
+diff --git a/meson.build b/meson.build
+index 47f3a5cf1..aaba6c8e2 100644
+--- a/meson.build
++++ b/meson.build
+@@ -1940,7 +1940,7 @@ if get_option('internal_pcre')
+   pcre = []
+   use_system_pcre = false
+ else
+-  pcre = dependency('libpcre', version: '>= 8.31', required : false) # Should check for Unicode support, too. FIXME
++  pcre = dependency('libpcre', version: '>= 8.31', required : false, method : 'pkg-config') # Should check for Unicode support, too. FIXME
+   if not pcre.found()
+     if cc.get_id() == 'msvc' or cc.get_id() == 'clang-cl'
+     # MSVC: Search for the PCRE library by the configuration, which corresponds
+-- 
+2.30.1
+

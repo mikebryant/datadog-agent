@@ -1,0 +1,65 @@
+From 7c25b20b2a4e171b8da25c78f30260dcb64592bd Mon Sep 17 00:00:00 2001
+From: Isabelle Sauve <isabelle.sauve@datadoghq.com>
+Date: Mon, 5 Apr 2021 10:31:45 -0400
+Subject: [PATCH] Wrap older glibc functions
+
+This patches libdnf to remove references to glibc symbols with a too recent version.
+
+Commands used to find symbols requiring a new version of GLIBC:
+// see version requirements of libdnf
+$ objdump -p /opt/nikos/embedded/lib/libdnf.so
+// figure out which functions/symbols need that version
+$ nm /opt/nikos/embedded/lib/libdnf.so | grep GLIBC_2.27
+
+---
+ libdnf/CMakeLists.txt |  2 +
+ libdnf/wrapper.c      | 38 +++++++++++++++++++
+ 2 files changed, 40 insertions(+)
+ create mode 100644 libdnf/wrapper.c
+
+diff --git a/libdnf/CMakeLists.txt b/libdnf/CMakeLists.txt
+index dcee38b1c..17807dcd9 100644
+--- a/libdnf/CMakeLists.txt
++++ b/libdnf/CMakeLists.txt
+@@ -29,6 +29,7 @@ set(LIBDNF_SRCS
+     dnf-state.cpp
+     dnf-transaction.cpp
+     dnf-utils.cpp
++    wrapper.c
+ )
+ 
+ include_directories(transaction)
+@@ -72,6 +73,7 @@ target_link_libraries(libdnf
+     ${LIBMODULEMD_LIBRARIES}
+     ${SMARTCOLS_LIBRARIES}
+     ${GPGME_VANILLA_LIBRARIES}
++    -Wl,--wrap=glob64
+ )
+ 
+ if(ENABLE_RHSM_SUPPORT)
+diff --git a/libdnf/wrapper.c b/libdnf/wrapper.c
+new file mode 100644
+index 000000000..e8ada1920
+--- /dev/null
++++ b/libdnf/wrapper.c
+@@ -0,0 +1,17 @@
++#include <glob.h>
++
++#ifdef __x86_64__
++#define GLIBC_VERS "GLIBC_2.2.5"
++#elif defined(__aarch64__)
++#define GLIBC_VERS "GLIBC_2.17"
++#else
++#error Unknown architecture
++#endif
++
++int __glob64_prior_glibc(const char *pattern, int flags, int (* errfunc)(const char *, int), glob_t *pglob); 
++
++asm(".symver __glob64_prior_glibc, glob64@" GLIBC_VERS);
++
++int __wrap_glob64(const char *pattern, int flags, int (* errfunc)(const char *, int), glob_t *pglob) { 
++  return __glob64_prior_glibc(pattern, flags, errfunc, pglob);
++}
+\ No newline at end of file
+-- 
+2.31.1
