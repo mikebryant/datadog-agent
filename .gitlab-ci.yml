@@ -100,6 +100,7 @@ variables:
   CLUSTER_AGENT_BINARIES_DIR: bin/datadog-cluster-agent
   CLUSTER_AGENT_CLOUDFOUNDRY_BINARIES_DIR: bin/datadog-cluster-agent-cloudfoundry
   SYSTEM_PROBE_BINARIES_DIR: bin/system-probe
+  NIKOS_EMBEDDED_LIBS_PATH: /opt/nikos/embedded/lib
   DEB_S3_BUCKET: apt.datad0g.com
   RPM_S3_BUCKET: yum.datad0g.com
   MACOS_S3_BUCKET: dd-agent-macostesting
