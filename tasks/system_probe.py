@@ -23,11 +23,13 @@ BPF_TAG = "linux_bpf"
 BUNDLE_TAG = "ebpf_bindata"
 BCC_TAG = "bcc"
 GIMME_ENV_VARS = ['GOROOT', 'PATH']
+DNF_TAG = "dnf"
 
 CLANG_CMD = "clang {flags} -c '{c_file}' -o '{bc_file}'"
 LLC_CMD = "llc -march=bpf -filetype=obj -o '{obj_file}' '{bc_file}'"
 
 DATADOG_AGENT_EMBEDDED_PATH = '/opt/datadog-agent/embedded'
+NIKOS_EMBEDDED_PATH = '/opt/nikos/embedded'
 
 KITCHEN_DIR = os.path.join("test", "kitchen")
 KITCHEN_ARTIFACT_DIR = os.path.join(KITCHEN_DIR, "site-cookbooks", "dd-system-probe-check", "files", "default", "tests")
@@ -45,6 +47,7 @@ def build(
     major_version='7',
     python_runtimes='3',
     with_bcc=True,
+    with_omnibus_nikos=False,
     go_mod="mod",
     windows=is_windows,
     arch="x64",
@@ -96,8 +99,13 @@ def build(
         build_tags.append(BUNDLE_TAG)
     if with_bcc:
         build_tags.append(BCC_TAG)
+    if with_omnibus_nikos:
+        build_omnibus_nikos(ctx)
+        build_tags.append(DNF_TAG)
+        env['PKG_CONFIG_PATH'] = env.get('PKG_CONFIG_PATH', '') + ':' + NIKOS_EMBEDDED_PATH + '/lib/pkgconfig'
+        env["LD_LIBRARY_PATH"] = env.get('LD_LIBRARY_PATH', '') + ':' + NIKOS_EMBEDDED_PATH + '/lib'
+        env["CGO_LDFLAGS"] =  env.get('CGO_LDFLAGS', '') + ' -Wl,-rpath,' + NIKOS_EMBEDDED_PATH + '/lib '
 
-    # TODO static option
     cmd = 'go build -mod={go_mod} {race_opt} {build_type} -tags "{go_build_tags}" '
     cmd += '-o {agent_bin} -gcflags="{gcflags}" -ldflags="{ldflags}" {REPO_PATH}/cmd/system-probe'
 
@@ -696,3 +704,23 @@ def tempdir():
         yield dirpath
     finally:
         shutil.rmtree(dirpath)
+
+def build_omnibus_nikos(ctx):
+    """
+    Build the nikos package with Omnibus Installer.
+    """
+    with ctx.cd("omnibus-nikos"):
+        # make sure bundle install starts from a clean state
+        try:
+            os.remove("Gemfile.lock")
+        except Exception:
+            pass
+
+        cmd = "bundle install"
+        ctx.run(cmd)
+
+        cmd = "bundle exec omnibus build nikos"
+        try:
+            ctx.run(cmd)
+        except Exception:
+            raise

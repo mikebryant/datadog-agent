@@ -453,6 +453,7 @@ def omnibus_build(
     system_probe_bin=None,
     libbcc_tarball=None,
     with_bcc=True,
+    nikos_libs_path=None,
 ):
     """
     Build the Agent packages with Omnibus Installer.
@@ -485,6 +486,8 @@ def omnibus_build(
         libbcc_tarball=libbcc_tarball,
         with_bcc=with_bcc,
     )
+    if nikos_libs_path is not None:
+        env["LD_LIBRARY_PATH"] = env.get('LD_LIBRARY_PATH', '') + ':' + nikos_libs_path
 
     target_project = "agent"
     if iot:
