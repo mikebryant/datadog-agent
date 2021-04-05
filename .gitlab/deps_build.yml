@@ -99,3 +99,20 @@ build_clang_arm64:
   tags: ["runner:docker-arm", "platform:arm64"]
   variables:
     ARCH: arm64
+
+build_omnibus-nikos:
+  stage: deps_build
+  image: 486234852809.dkr.ecr.us-east-1.amazonaws.com/ci/datadog-agent-buildimages/omnibus-nikos:$DATADOG_AGENT_NIKOS_BUILDIMAGES
+  tags: ["runner:main", "size:large"]
+  script:
+    - git clone https://github.com/DataDog/omnibus-nikos.git /tmp/omnibus-nikos
+    - cd /tmp/omnibus-nikos
+    - /bin/bash -l -c "bundle install"
+    - /bin/bash -l -c "bundle exec omnibus build nikos"
+    # Copy & package the libs needed for the system probe
+    - cd /opt/nikos/embedded/lib
+    - mkdir nikos-libs
+    - cp -R libdnf.a libgio-2.0.a libmodulemd.a libgobject-2.0.a libffi.a libyaml.a libgmodule-2.0.a librepo.a libglib-2.0.a libpcre.a libz.a libsolvext.a librpm.a librpmio.a libbz2.a libsolv.a libgpgme.a libassuan.a libgcrypt.a libgpg-error.a libsqlite3.a libcurl.a libnghttp2.a libssl.a libcrypto.a libjson-c.a liblzma.a libxml2.a libpopt.a libzstd.a pkgconfig nikos-libs
+    - cd nikos-libs
+    - tar cvzf nikos-libs.tar.gz *
+    - $S3_CP_CMD nikos-libs.tar.gz $S3_ARTIFACTS_URI/nikos-libs.tar.gz
