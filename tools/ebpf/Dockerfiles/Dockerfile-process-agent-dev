@@ -6,13 +6,14 @@ ARG CORE_AGENT_DEST
 RUN apt-get update -y && apt-get install -y jq conntrack netcat dnsutils iproute2 net-tools
 
 # the core agent has the library path hardcoded, this allows the agent included below to find libs
-ENV LD_LIBRARY_PATH /opt/datadog-agent/embedded/lib
+ENV LD_LIBRARY_PATH /opt/datadog-agent/embedded/lib:/opt/nikos/embedded/lib
 
 # inv -e process-agent.build-dev-image will set up a temporary
 # build directory where this Dockerfile and the necessary binaries
 # are in the same directory
 COPY process-agent /opt/datadog-agent/embedded/bin/process-agent
 COPY system-probe /opt/datadog-agent/embedded/bin/system-probe
+COPY nikos-libs /opt/nikos/embedded/lib
 
 # if you want to replace the base image's core agent binary, set $CORE_AGENT_DEST to 
 # /opt/datadog-agent/bin/agent/agent; otherwise, set it to /dev/null

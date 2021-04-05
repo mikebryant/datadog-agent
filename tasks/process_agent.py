@@ -114,7 +114,7 @@ def build(
 
 
 @task
-def build_dev_image(ctx, image=None, push=False, base_image="datadog/agent:latest", include_agent_binary=False):
+def build_dev_image(ctx, image=None, push=False, base_image="datadog/agent:latest", include_agent_binary=False, include_nikos_libs=False):
     """
     Build a dev image of the process-agent based off an existing datadog-agent image
 
@@ -138,6 +138,11 @@ def build_dev_image(ctx, image=None, push=False, base_image="datadog/agent:lates
             # this is necessary so that the docker build doesn't fail while attempting to copy the agent binary
             ctx.run("touch {tmp_dir}/agent".format(tmp_dir=docker_context))
             core_agent_dest = "/dev/null"
+        if include_nikos_libs:
+            ctx.run("cp -r /opt/nikos/embedded/lib {to}".format(to=docker_context + "/nikos-libs"))
+        else:
+            # this is necessary so that the docker build doesn't fail while attempting to copy the nikos libs
+            ctx.run("touch {tmp_dir}/nikos-libs".format(tmp_dir=docker_context))
 
         ctx.run("cp pkg/ebpf/bytecode/build/*.o {to}".format(to=docker_context))
         ctx.run("cp pkg/ebpf/bytecode/build/runtime/*.c {to}".format(to=docker_context))
