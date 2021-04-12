@@ -51,6 +51,7 @@ func (ev *Event) ResolveFileInode(f *model.FileEvent) string {
 		path, err := ev.resolvers.resolveInode(&f.FileFields)
 		if err != nil {
 			if _, ok := err.(ErrTruncatedParents); ok {
+				f.PathResolutionError = err
 				ev.SetPathResolutionError(err)
 			}
 		}
