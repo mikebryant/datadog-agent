@@ -348,7 +348,6 @@ func NewModule(cfg *config.Config) (api.Module, error) {
 
 	// custom limiters
 	limits := make(map[rules.RuleID]Limit)
-	limits[sprobe.AbnormalPathRuleID] = Limit{Limit: 0, Burst: 0}
 
 	m := &Module{
 		config:         cfg,
