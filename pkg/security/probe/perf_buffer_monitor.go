@@ -20,7 +20,6 @@ import (
 	"github.com/DataDog/datadog-agent/pkg/security/ebpf/probes"
 	"github.com/DataDog/datadog-agent/pkg/security/metrics"
 	"github.com/DataDog/datadog-agent/pkg/security/model"
-	"github.com/DataDog/datadog-agent/pkg/tagger/collectors"
 )
 
 // PerfMapStats contains the collected metrics for one event and one cpu in a perf buffer statistics map
@@ -298,7 +297,7 @@ func (pbm *PerfBufferMonitor) CountEvent(eventType model.EventType, timestamp ui
 	// check event order
 	if timestamp < pbm.lastTimestamp && pbm.lastTimestamp != 0 {
 		tags := metrics.SetTagsWithCardinality(
-			collectors.HighCardinality,
+			pbm.probe.config.StatsTagsCardinality,
 			fmt.Sprintf("map:%s", m.Name),
 			fmt.Sprintf("event_type:%s", eventType),
 		)
@@ -322,7 +321,7 @@ func (pbm *PerfBufferMonitor) sendEventsAndBytesReadStats(client *statsd.Client)
 			for eventType := range pbm.stats[m][cpu] {
 				evtType := model.EventType(eventType)
 				tags := metrics.SetTagsWithCardinality(
-					collectors.HighCardinality,
+					pbm.probe.config.StatsTagsCardinality,
 					fmt.Sprintf("map:%s", m),
 					fmt.Sprintf("event_type:%s", evtType),
 				)
@@ -352,7 +351,7 @@ func (pbm *PerfBufferMonitor) sendLostEventsReadStats(client *statsd.Client) err
 
 		for cpu := range pbm.readLostEvents[m] {
 			tags := metrics.SetTagsWithCardinality(
-				collectors.HighCardinality,
+				pbm.probe.config.StatsTagsCardinality,
 				fmt.Sprintf("map:%s", m),
 			)
 			if count := float64(pbm.getAndResetReadLostCount(m, cpu)); count > 0 {
@@ -410,7 +409,7 @@ func (pbm *PerfBufferMonitor) collectAndSendKernelStats(client *statsd.Client) e
 
 				// prepare metrics tags
 				tags = metrics.SetTagsWithCardinality(
-					collectors.HighCardinality,
+					pbm.probe.config.StatsTagsCardinality,
 					fmt.Sprintf("map:%s", perfMapName),
 					fmt.Sprintf("event_type:%s", evtType),
 				)
