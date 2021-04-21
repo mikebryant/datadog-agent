@@ -94,25 +94,26 @@ func New(configPath string) (*Config, error) {
 
 // Merge will merge the system-probe configuration into the existing datadog configuration
 func Merge(configPath string) (*Config, error) {
-	if configPath != "" {
-		if !strings.HasSuffix(configPath, ".yaml") {
-			configPath = path.Join(configPath, defaultConfigFileName)
+	cfgPath := configPath
+	if cfgPath != "" {
+		if !strings.HasSuffix(cfgPath, ".yaml") {
+			cfgPath = path.Join(cfgPath, defaultConfigFileName)
 		}
 	} else {
-		configPath = path.Join(defaultConfigDir, defaultConfigFileName)
+		cfgPath = path.Join(defaultConfigDir, defaultConfigFileName)
 	}
 
-	if f, err := os.Open(configPath); err == nil {
+	if f, err := os.Open(cfgPath); err == nil {
 		err = aconfig.Datadog.MergeConfig(f)
 		_ = f.Close()
 		if err != nil {
 			return nil, fmt.Errorf("error merging system-probe config file: %s", err)
 		}
 	} else {
-		log.Infof("no config exists at %s, ignoring...", configPath)
+		log.Infof("no config exists at %s, ignoring...", cfgPath)
 	}
 
-	return load(configPath)
+	return load(cfgPath)
 }
 
 func load(configPath string) (*Config, error) {
