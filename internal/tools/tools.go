@@ -17,6 +17,7 @@ import (
 	_ "github.com/golangci/golangci-lint/cmd/golangci-lint"
 	_ "github.com/gordonklaus/ineffassign"
 	_ "github.com/goware/modvendor"
+	_ "github.com/stormcat24/protodep"
 	_ "github.com/stretchr/testify"
 	_ "golang.org/x/lint/golint"
 	_ "golang.org/x/mobile/bind"

@@ -5,6 +5,7 @@ Golang related tasks go here
 
 import copy
 import datetime
+import glob
 import os
 import shutil
 
@@ -396,6 +397,41 @@ def get_licenses_list(ctx):
     licenses.sort()
     shutil.rmtree("vendor/")
     return licenses
+
+
+@task
+def generate_protobuf(ctx):
+    """
+    Generates protobuf defintions in pkg/proto
+    """
+    base = os.path.dirname(os.path.abspath(__file__))
+    repo_root = os.path.abspath(os.path.join(base, ".."))
+    proto_root = os.path.join(repo_root, "pkg", "proto")
+    targets = os.path.join(proto_root, "datadog", "**", "*.proto")  # protoc supports globs
+
+    print("nuking old definitions at: {}".format(proto_root))
+    file_list = glob.glob(os.path.join(proto_root, "pbgo", "*.go"))
+    for file_path in file_list:
+        try:
+            os.remove(file_path)
+        except OSError:
+            print("Error while deleting file : ", file_path)
+
+    with ctx.cd(repo_root):
+        # protobuf defs
+        print("generating protobuf code from: {}".format(proto_root))
+
+        ctx.run(
+            "protoc -I{include_path} --go_out=plugins=grpc:{out_path} {targets}".format(
+                include_path=proto_root, out_path=repo_root, targets=targets,
+            )
+        )
+        # grpc-gateway logic
+        ctx.run(
+            "protoc -I{include_path} --grpc-gateway_out=logtostderr=true:{out_path} {targets}".format(
+                include_path=proto_root, out_path=repo_root, targets=targets,
+            )
+        )
 
 
 @task

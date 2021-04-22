@@ -12,7 +12,7 @@ import (
 	"sync" // might be unnecessary
 	"time"
 
-	"github.com/DataDog/datadog-agent/pkg/dogstatsd/replay/pb"
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo"
 	"github.com/DataDog/datadog-agent/pkg/util/log"
 
 	proto "github.com/golang/protobuf/proto"
@@ -120,4 +120,23 @@ func (tc *TrafficCaptureReader) ReadNext() (*pb.UnixDogstatsdMsg, error) {
 	tc.Unlock()
 
 	return msg, nil
+}
+
+// Read reads the next protobuf packet available in the file and returns it in a byte slice, and an error if any.
+func Read(r io.Reader) ([]byte, error) {
+	buf := make([]byte, 4)
+	if _, err := io.ReadFull(r, buf); err != nil {
+		return nil, err
+	}
+
+	size := binary.LittleEndian.Uint32(buf)
+
+	msg := make([]byte, size)
+
+	_, err := io.ReadFull(r, msg)
+	if err != nil {
+		return nil, err
+	}
+
+	return msg, err
 }
