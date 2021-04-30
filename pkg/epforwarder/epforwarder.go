@@ -5,6 +5,7 @@ import (
 	"strings"
 	"sync"
 
+	coreConfig "github.com/DataDog/datadog-agent/pkg/config"
 	"github.com/DataDog/datadog-agent/pkg/logs/auditor"
 	"github.com/DataDog/datadog-agent/pkg/logs/client"
 	"github.com/DataDog/datadog-agent/pkg/logs/client/http"
@@ -119,16 +120,7 @@ type passthroughPipelineDesc struct {
 // newHTTPPassthroughPipeline creates a new HTTP-only event platform pipeline that sends messages directly to intake
 // without any of the processing that exists in regular logs pipelines.
 func newHTTPPassthroughPipeline(desc passthroughPipelineDesc, destinationsContext *client.DestinationsContext) (p *passthroughPipeline, err error) {
-	configKeys := config.LogsConfigKeys{
-		CompressionLevel:        desc.endpointsConfigPrefix + ".compression_level",
-		ConnectionResetInterval: desc.endpointsConfigPrefix + ".connection_reset_interval",
-		LogsDDURL:               desc.endpointsConfigPrefix + ".logs_dd_url",
-		DDURL:                   desc.endpointsConfigPrefix + ".dd_url",
-		DevModeNoSSL:            desc.endpointsConfigPrefix + ".dev_mode_no_ssl",
-		AdditionalEndpoints:     desc.endpointsConfigPrefix + ".additional_endpoints",
-		BatchWait:               desc.endpointsConfigPrefix + ".batch_wait",
-		BatchMaxConcurrentSend:  desc.endpointsConfigPrefix + ".batch_max_concurrent_send",
-	}
+	configKeys := config.NewLogsConfigKeys(desc.endpointsConfigPrefix+".", coreConfig.Datadog)
 	endpoints, err := config.BuildHTTPEndpointsWithConfig(configKeys, desc.hostnameEndpointPrefix)
 	if err != nil {
 		return nil, err
