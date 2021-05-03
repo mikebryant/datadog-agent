@@ -16,6 +16,12 @@ import (
 	"time"
 	"unsafe"
 
+	"github.com/DataDog/datadog-go/statsd"
+	lib "github.com/DataDog/ebpf"
+	"github.com/DataDog/ebpf/manager"
+	"github.com/cihub/seelog"
+	"github.com/pkg/errors"
+
 	"github.com/DataDog/datadog-agent/pkg/ebpf/bytecode"
 	pconfig "github.com/DataDog/datadog-agent/pkg/process/config"
 	"github.com/DataDog/datadog-agent/pkg/security/config"
@@ -25,13 +31,9 @@ import (
 	"github.com/DataDog/datadog-agent/pkg/security/model"
 	"github.com/DataDog/datadog-agent/pkg/security/rules"
 	"github.com/DataDog/datadog-agent/pkg/security/secl/eval"
+	"github.com/DataDog/datadog-agent/pkg/security/utils"
 	"github.com/DataDog/datadog-agent/pkg/util/kernel"
 	"github.com/DataDog/datadog-agent/pkg/util/log"
-	"github.com/DataDog/datadog-go/statsd"
-	lib "github.com/DataDog/ebpf"
-	"github.com/DataDog/ebpf/manager"
-	"github.com/cihub/seelog"
-	"github.com/pkg/errors"
 )
 
 // EventHandler represents an handler for the events sent by the probe
@@ -804,6 +806,10 @@ func NewProbe(config *config.Config, client *statsd.Client) (*Probe, error) {
 
 	// Add global constant editors
 	p.managerOptions.ConstantEditors = append(p.managerOptions.ConstantEditors,
+		manager.ConstantEditor{
+			Name:  "runtime_pid",
+			Value: uint64(utils.Getpid()),
+		},
 		manager.ConstantEditor{
 			Name:  "do_fork_input",
 			Value: getDoForkInput(p),

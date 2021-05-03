@@ -51,7 +51,7 @@ func AllProbes() []*manager.Probe {
 		// Snapshot probe
 		&manager.Probe{
 			UID:     SecurityAgentUID,
-			Section: "kretprobe/get_task_exe_file",
+			Section: "kprobe/security_inode_getattr",
 		},
 	)
 
@@ -70,7 +70,7 @@ func AllMaps() []*manager.Map {
 		// Dentry resolver table
 		{Name: "pathnames"},
 		// Snapshot table
-		{Name: "inode_info_cache"},
+		{Name: "exec_file_cache"},
 		// Open tables
 		{Name: "open_flags_approvers"},
 		// Exec tables

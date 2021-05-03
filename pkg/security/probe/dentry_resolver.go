@@ -15,8 +15,9 @@ import (
 	lib "github.com/DataDog/ebpf"
 	lru "github.com/hashicorp/golang-lru"
 	"github.com/pkg/errors"
+
+	"github.com/DataDog/datadog-agent/pkg/security/model"
 )
-import "github.com/DataDog/datadog-agent/pkg/security/model"
 
 const (
 	dentryPathKeyNotFound = "error: dentry path key not found"
@@ -71,7 +72,10 @@ func (p *PathKey) MarshalBinary() ([]byte, error) {
 		return nil, &ErrInvalidKeyPath{Inode: p.Inode, MountID: p.MountID}
 	}
 
-	return make([]byte, 16), nil
+	buff := make([]byte, 16)
+	p.Write(buff)
+
+	return buff, nil
 }
 
 // PathValue describes a value of an entry of the cache
