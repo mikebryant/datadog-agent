@@ -6,7 +6,6 @@ import (
 	"os"
 	"os/signal"
 	"syscall"
-	"time"
 
 	"github.com/fatih/color"
 	"github.com/spf13/cobra"
@@ -195,13 +194,15 @@ func enableProfiling(cfg *config.Config) error {
 			site = cfg.ProfilingURL
 		}
 	}
+	log.Debug(cfg.ProfilingPeriod)
 
 	return profiling.Start(
 		cfg.ProfilingAPIKey,
 		site,
 		cfg.ProfilingEnvironment,
 		"system-probe",
-		time.Duration(cfg.ProfilingPeriod)*time.Minute,
+		cfg.ProfilingPeriod,
+		cfg.ProfilingCPUDuration,
 		fmt.Sprintf("version:%v", v),
 	)
 }
