@@ -23,6 +23,20 @@ import (
 // apiEndpointPrefix is the URL prefix prepended to the default site value from YamlAgentConfig.
 const apiEndpointPrefix = "https://trace.agent."
 
+// OTLP holds the configuration for the OpenTelemetry receiver.
+type OTLP struct {
+	// BindHost specifies the host to bind the receiver to.
+	BindHost string `mapstructure:"-"`
+
+	// HTTPPort specifies the port to use for the plain HTTP receiver.
+	// If unset (or 0), the receiver will be off.
+	HTTPPort int `mapstructure:"http_port"`
+
+	// GRPCPort specifies the port to use for the plain HTTP receiver.
+	// If unset (or 0), the receiver will be off.
+	GRPCPort int `mapstructure:"grpc_port"`
+}
+
 // ObfuscationConfig holds the configuration for obfuscating sensitive data
 // for various span types.
 type ObfuscationConfig struct {
@@ -252,6 +266,13 @@ func (c *AgentConfig) applyDatadogConfig() error {
 		// Automatically activate non local traffic in containerized environment if no explicit config set
 		log.Info("Activating non-local traffic automatically in containerized environment, trace-agent will listen on 0.0.0.0")
 		c.ReceiverHost = "0.0.0.0"
+	}
+
+	if config.Datadog.IsSet("apm_config.otlp") {
+		o := OTLP{BindHost: c.ReceiverHost}
+		if err := config.Datadog.UnmarshalKey("apm_config.otlp", &o); err == nil {
+			c.OTLPReceiver = &o
+		}
 	}
 
 	if config.Datadog.IsSet("apm_config.obfuscation") {

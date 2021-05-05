@@ -126,6 +126,9 @@ type AgentConfig struct {
 
 	// RejectTags specifies a list of tags which must be absent on the root span in order for a trace to be accepted.
 	RejectTags []*Tag
+
+	// OTLPReceiver holds the configuration for OpenTelemetry receiver.
+	OTLPReceiver *OTLP
 }
 
 // Tag represents a key/value pair.
@@ -171,7 +174,8 @@ func New() *AgentConfig {
 
 		GlobalTags: make(map[string]string),
 
-		DDAgentBin: defaultDDAgentBin,
+		DDAgentBin:   defaultDDAgentBin,
+		OTLPReceiver: &OTLP{},
 	}
 }
 
@@ -296,6 +300,9 @@ func SetFeatures(feats string) {
 	}
 	all := strings.Split(feats, ",")
 	for _, f := range all {
+		if f == "" {
+			continue
+		}
 		features[strings.TrimSpace(f)] = struct{}{}
 	}
 	if active := Features(); len(active) > 0 {
