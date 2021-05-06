@@ -8,6 +8,7 @@ import datetime
 import glob
 import os
 import shutil
+from pathlib import Path 
 
 import yaml
 from invoke import task
@@ -407,7 +408,6 @@ def generate_protobuf(ctx):
     base = os.path.dirname(os.path.abspath(__file__))
     repo_root = os.path.abspath(os.path.join(base, ".."))
     proto_root = os.path.join(repo_root, "pkg", "proto")
-    targets = os.path.join(proto_root, "datadog", "**", "*.proto")  # protoc supports globs
 
     print("nuking old definitions at: {}".format(proto_root))
     file_list = glob.glob(os.path.join(proto_root, "pbgo", "*.go"))
@@ -421,15 +421,32 @@ def generate_protobuf(ctx):
         # protobuf defs
         print("generating protobuf code from: {}".format(proto_root))
 
+        files = []
+        for path in Path(os.path.join(proto_root, "datadog")).rglob('*.proto'): 
+            files.append(path.as_posix())
+
         ctx.run(
             "protoc -I{include_path} --go_out=plugins=grpc:{out_path} {targets}".format(
-                include_path=proto_root, out_path=repo_root, targets=targets,
+                include_path=proto_root, out_path=repo_root, targets=' '.join(files),
             )
         )
         # grpc-gateway logic
         ctx.run(
             "protoc -I{include_path} --grpc-gateway_out=logtostderr=true:{out_path} {targets}".format(
-                include_path=proto_root, out_path=repo_root, targets=targets,
+                include_path=proto_root, out_path=repo_root, targets=' '.join(files),
+            )
+        )
+        # mockgen
+        mockgen_in = os.path.join(proto_root, "pbgo") 
+        mockgen_out = os.path.join(proto_root, "pbgo", "mocks") 
+        try:
+            os.mkdir(mockgen_out)
+        except FileExistsError:
+            pass 
+
+        ctx.run(
+            "mockgen -source={in_path}/api.pb.go -destination={out_path}/api_mockgen.pb.go".format(
+                in_path=mockgen_in, out_path=mockgen_out
             )
         )
 

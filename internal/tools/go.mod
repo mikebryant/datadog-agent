@@ -7,9 +7,12 @@ require (
 	github.com/cloudfoundry-incubator/candiedyaml v0.0.0-20170901234223-a41693b7b7af // indirect
 	github.com/frapposelli/wwhrd v0.2.4
 	github.com/fzipp/gocyclo v0.3.1
+	github.com/golang/mock v1.3.1
+	github.com/golang/protobuf v1.3.2
 	github.com/golangci/golangci-lint v1.27.0
 	github.com/gordonklaus/ineffassign v0.0.0-20210103220932-664217a59c00
 	github.com/goware/modvendor v0.3.0
+	github.com/grpc-ecosystem/grpc-gateway v1.9.0
 	github.com/stormcat24/protodep v0.0.0-20210106175019-c95189bc461b
 	github.com/stretchr/testify v1.6.1
 	golang.org/x/lint v0.0.0-20200302205851-738671d3881b
@@ -17,6 +20,7 @@ require (
 	golang.org/x/perf v0.0.0-20200918155509-d949658356f9
 	golang.org/x/sys v0.0.0-20210326220804-49726bf1d181 // indirect
 	golang.org/x/tools v0.1.0
+	google.golang.org/grpc v1.21.0
 	gotest.tools/gotestsum v0.5.3
 	honnef.co/go/tools v0.0.1-2020.1.5
 )
