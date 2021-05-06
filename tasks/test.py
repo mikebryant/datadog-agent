@@ -33,12 +33,17 @@ def ensure_bytes(s):
 
     return s
 
+
 @contextmanager
 def environ(env):
     original_environ = os.environ.copy()
     os.environ.update(env)
     yield
-    os.environ = original_environ
+    for k, v in original_environ.items():
+        os.environ[k] = v
+    for k in env:
+        if k not in original_environ:
+            os.environ.pop(k)
 
 
 TOOL_LIST = [
@@ -51,6 +56,8 @@ TOOL_LIST = [
     'github.com/stormcat24/protodep',
     'github.com/grpc-ecosystem/grpc-gateway/protoc-gen-grpc-gateway@v1.12.2',
     'github.com/golang/protobuf/protoc-gen-go@v1.3.2',
+    'github.com/golang/protobuf/protoc-gen-go@v1.3.2',
+    'github.com/golang/mock/mockgen@v1.5.0',
     'golang.org/x/lint/golint',
     'gotest.tools/gotestsum',
     'honnef.co/go/tools/cmd/staticcheck',
@@ -60,10 +67,11 @@ TOOL_LIST = [
 @task
 def install_tools(ctx):
     """Install all Go tools for testing."""
-    with environ({ 'GO111MODULE': 'on'}):
+    with environ({'GO111MODULE': 'on'}):
         with ctx.cd("internal/tools"):
             for tool in TOOL_LIST:
                 ctx.run("go install {}".format(tool))
+
 
 @task()
 def test(
