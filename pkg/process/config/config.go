@@ -16,7 +16,7 @@ import (
 	"time"
 
 	model "github.com/DataDog/agent-payload/process"
-	"github.com/DataDog/datadog-agent/cmd/agent/api/pb"
+	pb "github.com/DataDog/datadog-agent/pkg/proto/pbgo"
 	sysconfig "github.com/DataDog/datadog-agent/cmd/system-probe/config"
 	"github.com/DataDog/datadog-agent/pkg/config"
 	oconfig "github.com/DataDog/datadog-agent/pkg/orchestrator/config"
