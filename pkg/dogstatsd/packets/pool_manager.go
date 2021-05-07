@@ -45,10 +45,6 @@ func (p *PoolManager) Get() interface{} {
 // reference holders before actually returning it to the object pool.
 func (p *PoolManager) Put(x interface{}) {
 
-	if x == nil {
-		return
-	}
-
 	if p.IsPassthru() {
 		p.pool.Put(x)
 		return
@@ -62,8 +58,14 @@ func (p *PoolManager) Put(x interface{}) {
 
 	switch v := x.(type) {
 	case []uint8:
+		if v == nil {
+			return
+		}
 		ref = &v
 	default:
+		if v == nil {
+			return
+		}
 		ref = v
 	}
 
