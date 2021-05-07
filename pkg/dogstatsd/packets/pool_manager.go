@@ -45,6 +45,10 @@ func (p *PoolManager) Get() interface{} {
 // reference holders before actually returning it to the object pool.
 func (p *PoolManager) Put(x interface{}) {
 
+	if x == nil {
+		return
+	}
+
 	if p.IsPassthru() {
 		p.pool.Put(x)
 		return
