@@ -8,6 +8,8 @@ package packets
 import (
 	"sync"
 	"sync/atomic"
+
+	"github.com/DataDog/datadog-agent/pkg/util/log"
 )
 
 type genericPool interface {
@@ -61,6 +63,7 @@ func (p *PoolManager) Put(x interface{}) {
 		ref = v
 	}
 
+	log.Debugf("Putting back interface: %v and reference: %v\n", x, ref)
 
 	// TODO: use LoadAndDelete when go 1.15 is introduced
 	_, loaded := p.refs.Load(ref)
