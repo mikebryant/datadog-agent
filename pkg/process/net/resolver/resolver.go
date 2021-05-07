@@ -89,7 +89,7 @@ func (l *LocalResolver) Resolve(c *model.Connections) {
 
 		raddr.ContainerId = l.addrToCtrID[addr]
 
-		// resolver laddr
+		// resolve laddr
 		cid, ok := l.ctrForPid[conn.Pid]
 		if !ok {
 			continue
@@ -97,23 +97,17 @@ func (l *LocalResolver) Resolve(c *model.Connections) {
 
 		conn.Laddr.ContainerId = cid
 
-		laddr := translatedLaddr(conn.Laddr, conn.IpTranslation)
+		laddr := translatedContainerLaddr(conn.Laddr, conn.IpTranslation, conn.Type)
 		ip := procutil.AddressFromString(laddr.Ip)
 		if ip == nil {
 			continue
-		}
-
-		claddr := model.ContainerAddr{
-			Ip:       laddr.Ip,
-			Port:     laddr.Port,
-			Protocol: conn.Type,
 		}
 
 		netns := conn.NetNS
 		if !ip.IsLoopback() {
 			netns = 0
 		}
-		ctrsByLaddr[addrWithNS{claddr, netns}] = cid
+		ctrsByLaddr[addrWithNS{laddr, netns}] = cid
 	}
 
 	log.Tracef("ctrsByLaddr = %v", ctrsByLaddr)
@@ -125,15 +119,10 @@ func (l *LocalResolver) Resolve(c *model.Connections) {
 			continue
 		}
 
-		ip := procutil.AddressFromString(conn.Raddr.Ip)
+		raddr := translatedContainerRaddr(conn.Raddr, conn.IpTranslation, conn.Type)
+		ip := procutil.AddressFromString(raddr.Ip)
 		if ip == nil {
 			continue
-		}
-
-		raddr := model.ContainerAddr{
-			Ip:       conn.Raddr.Ip,
-			Port:     conn.Raddr.Port,
-			Protocol: conn.Type,
 		}
 
 		var ok bool
@@ -155,15 +144,34 @@ func (l *LocalResolver) Resolve(c *model.Connections) {
 	}
 }
 
-func translatedLaddr(laddr *model.Addr, trans *model.IPTranslation) *model.Addr {
+func translatedContainerLaddr(laddr *model.Addr, trans *model.IPTranslation, proto model.ConnectionType) model.ContainerAddr {
 	if trans == nil {
-		return laddr
+		return model.ContainerAddr{
+			Ip:       laddr.Ip,
+			Port:     laddr.Port,
+			Protocol: proto,
+		}
 	}
 
-	return &model.Addr{
-		Ip:          trans.ReplDstIP,
-		Port:        trans.ReplDstPort,
-		HostId:      laddr.HostId,
-		ContainerId: laddr.ContainerId,
+	return model.ContainerAddr{
+		Ip:       trans.ReplDstIP,
+		Port:     trans.ReplDstPort,
+		Protocol: proto,
+	}
+}
+
+func translatedContainerRaddr(raddr *model.Addr, trans *model.IPTranslation, proto model.ConnectionType) model.ContainerAddr {
+	if trans == nil {
+		return model.ContainerAddr{
+			Ip:       raddr.Ip,
+			Port:     raddr.Port,
+			Protocol: proto,
+		}
+	}
+
+	return model.ContainerAddr{
+		Ip:       trans.ReplSrcIP,
+		Port:     trans.ReplSrcPort,
+		Protocol: proto,
 	}
 }

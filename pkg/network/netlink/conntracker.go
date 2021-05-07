@@ -336,41 +336,37 @@ func (cc *conntrackCache) Remove(k connKey) bool {
 }
 
 func (cc *conntrackCache) Add(c Con, orphan bool) (evicts int) {
-	registerTuple := func(keyTuple, transTuple *ct.IPTuple) {
-		key, ok := formatKey(keyTuple)
-		if !ok {
-			return
-		}
+	log.Tracef("%s", c)
 
-		if v, ok := cc.cache.Peek(key); ok {
-			// value is going to get replaced
-			// by the call to Add below, make
-			// sure orphan is removed
-			t := v.(*translationEntry)
-			if t.orphan != nil {
-				cc.orphans.Remove(t.orphan)
-			}
-		}
+	key, ok := formatKey(c.Origin)
+	if !ok {
+		return
+	}
 
-		t := &translationEntry{
-			IPTranslation: formatIPTranslation(transTuple),
-		}
-		if orphan {
-			t.orphan = cc.orphans.PushFront(&orphanEntry{
-				key:     key,
-				expires: time.Now().Add(cc.orphanTimeout),
-			})
-		}
-
-		if cc.cache.Add(key, t) {
-			evicts++
+	if v, ok := cc.cache.Peek(key); ok {
+		// value is going to get replaced
+		// by the call to Add below, make
+		// sure orphan is removed
+		t := v.(*translationEntry)
+		if t.orphan != nil {
+			cc.orphans.Remove(t.orphan)
 		}
 	}
 
-	log.Tracef("%s", c)
+	t := &translationEntry{
+		IPTranslation: formatIPTranslation(c.Reply),
+	}
+	if orphan {
+		t.orphan = cc.orphans.PushFront(&orphanEntry{
+			key:     key,
+			expires: time.Now().Add(cc.orphanTimeout),
+		})
+	}
 
-	registerTuple(c.Origin, c.Reply)
-	registerTuple(c.Reply, c.Origin)
+	if cc.cache.Add(key, t) {
+		evicts++
+	}
+
 	return
 }
 

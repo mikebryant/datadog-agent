@@ -180,7 +180,7 @@ func TestRegisterNatUDP(t *testing.T) {
 }
 
 func TestTooManyEntries(t *testing.T) {
-	rt := newConntracker(2)
+	rt := newConntracker(1)
 
 	rt.register(makeTranslatedConn(net.ParseIP("10.0.0.0"), net.ParseIP("20.0.0.0"), net.ParseIP("50.30.40.10"), 6, 12345, 80, 80))
 	tr := rt.GetTranslationForConn(network.ConnectionStats{
@@ -244,7 +244,7 @@ func TestConntrackCacheAdd(t *testing.T) {
 				80,
 				80),
 			false)
-		require.Equal(t, 2, cache.cache.Len())
+		require.Equal(t, 1, cache.cache.Len())
 		require.Equal(t, 0, cache.orphans.Len())
 		crossCheckCacheOrphans(t, cache)
 	})
@@ -261,8 +261,8 @@ func TestConntrackCacheAdd(t *testing.T) {
 				80,
 				80),
 			true)
-		require.Equal(t, 2, cache.cache.Len())
-		require.Equal(t, 2, cache.orphans.Len())
+		require.Equal(t, 1, cache.cache.Len())
+		require.Equal(t, 1, cache.orphans.Len())
 		crossCheckCacheOrphans(t, cache)
 
 		tests := []struct {
@@ -279,16 +279,6 @@ func TestConntrackCacheAdd(t *testing.T) {
 				},
 				expectedReplSrcIP:   "2.2.2.2",
 				expectedReplSrcPort: 80,
-			},
-			{
-				k: connKey{
-					srcIP:   util.AddressFromString("2.2.2.2"),
-					srcPort: 80,
-					dstIP:   util.AddressFromString("1.1.1.1"),
-					dstPort: 12345,
-				},
-				expectedReplSrcIP:   "1.1.1.1",
-				expectedReplSrcPort: 12345,
 			},
 		}
 
@@ -323,8 +313,8 @@ func TestConntrackCacheAdd(t *testing.T) {
 				80,
 				80),
 			true)
-		require.Equal(t, 2, cache.cache.Len())
-		require.Equal(t, 2, cache.orphans.Len())
+		require.Equal(t, 1, cache.cache.Len())
+		require.Equal(t, 1, cache.orphans.Len())
 		crossCheckCacheOrphans(t, cache)
 
 		// add a connection with the same origin
@@ -339,8 +329,8 @@ func TestConntrackCacheAdd(t *testing.T) {
 				80,
 				80),
 			true)
-		require.Equal(t, 3, cache.cache.Len())
-		require.Equal(t, 3, cache.orphans.Len())
+		require.Equal(t, 1, cache.cache.Len())
+		require.Equal(t, 1, cache.orphans.Len())
 		crossCheckCacheOrphans(t, cache)
 
 		tests := []struct {
@@ -357,26 +347,6 @@ func TestConntrackCacheAdd(t *testing.T) {
 				},
 				expectedReplSrcIP:   "4.4.4.4",
 				expectedReplSrcPort: 80,
-			},
-			{
-				k: connKey{
-					srcIP:   util.AddressFromString("4.4.4.4"),
-					srcPort: 80,
-					dstIP:   util.AddressFromString("1.1.1.1"),
-					dstPort: 12345,
-				},
-				expectedReplSrcIP:   "1.1.1.1",
-				expectedReplSrcPort: 12345,
-			},
-			{
-				k: connKey{
-					srcIP:   util.AddressFromString("2.2.2.2"),
-					srcPort: 80,
-					dstIP:   util.AddressFromString("1.1.1.1"),
-					dstPort: 12345,
-				},
-				expectedReplSrcIP:   "1.1.1.1",
-				expectedReplSrcPort: 12345,
 			},
 		}
 
@@ -412,7 +382,7 @@ func TestConntrackCacheRemoveOrphans(t *testing.T) {
 		rt.cache.orphanTimeout = defaultOrphanTimeout
 
 		ipGen := randomIPGen()
-		for i := 0; i < rt.maxStateSize/2; i++ {
+		for i := 0; i < rt.maxStateSize; i++ {
 			c := makeTranslatedConn(ipGen(), ipGen(), ipGen(), 6, 12345, 80, 80)
 			rt.register(c)
 		}
@@ -439,12 +409,12 @@ func TestConntrackCacheRemoveOrphans(t *testing.T) {
 			rt.register(c)
 		}
 
-		require.Equal(t, int64(rt.maxStateSize/2), rt.cache.removeOrphans(time.Now().Add(5*time.Second)))
-		require.Equal(t, rt.maxStateSize/2, rt.cache.orphans.Len())
-		require.Equal(t, rt.maxStateSize/2, rt.cache.cache.Len())
+		require.Equal(t, int64(rt.maxStateSize/4), rt.cache.removeOrphans(time.Now().Add(5*time.Second)))
+		require.Equal(t, rt.maxStateSize/4, rt.cache.orphans.Len())
+		require.Equal(t, rt.maxStateSize/4, rt.cache.cache.Len())
 		crossCheckCacheOrphans(t, rt.cache)
 
-		require.Equal(t, int64(rt.maxStateSize/2), rt.cache.removeOrphans(time.Now().Add(2*time.Minute)))
+		require.Equal(t, int64(rt.maxStateSize/4), rt.cache.removeOrphans(time.Now().Add(2*time.Minute)))
 		require.Equal(t, 0, rt.cache.orphans.Len())
 		require.Equal(t, 0, rt.cache.cache.Len())
 		crossCheckCacheOrphans(t, rt.cache)
