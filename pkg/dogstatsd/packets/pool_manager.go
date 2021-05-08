@@ -47,7 +47,6 @@ func (p *PoolManager) Put(x interface{}) {
 
 	if p.IsPassthru() {
 		p.pool.Put(x)
-		log.Debugf("Passthuru, just returned: %v to packet pool.", x)
 		return
 	}
 
@@ -72,7 +71,7 @@ func (p *PoolManager) Put(x interface{}) {
 		// reference exists, put back.
 		p.refs.Delete(ref)
 		p.pool.Put(x)
-		log.Debugf("Just returned: %v to packet pool.", x)
+		log.Debugf("Returning type: %T to packet pool.", x)
 	} else {
 		// reference does not exist, account.
 		p.refs.Store(ref, struct{}{})
