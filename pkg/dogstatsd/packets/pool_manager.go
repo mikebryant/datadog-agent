@@ -58,14 +58,8 @@ func (p *PoolManager) Put(x interface{}) {
 
 	switch v := x.(type) {
 	case []uint8:
-		if v == nil {
-			return
-		}
 		ref = &v
 	default:
-		if v == nil {
-			return
-		}
 		ref = v
 	}
 
@@ -77,6 +71,7 @@ func (p *PoolManager) Put(x interface{}) {
 		// reference exists, put back.
 		p.refs.Delete(ref)
 		p.pool.Put(x)
+		log.Debugf("Just returned: %v to packet pool.", x)
 	} else {
 		// reference does not exist, account.
 		p.refs.Store(ref, struct{}{})
