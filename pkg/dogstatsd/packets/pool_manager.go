@@ -60,8 +60,14 @@ func (p *PoolManager) Put(x interface{}) {
 	switch v := x.(type) {
 	case []uint8:
 		ref = unsafe.Pointer(&v)
-	default:
+		log.Debugf("Processing type: %T", ref)
+	case *Packet:
 		ref = v
+		log.Debugf("Processing type: %T", ref)
+	default:
+		// unsupported type in manager, just put back
+		p.pool.Put(x)
+		return
 	}
 
 	// TODO: use LoadAndDelete when go 1.15 is introduced
