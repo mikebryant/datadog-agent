@@ -33,7 +33,7 @@ const (
 // message used for serialization.
 type CaptureBuffer struct {
 	Pb          pb.UnixDogstatsdMsg
-	Oob         *[]byte
+	Oob         []byte
 	ContainerID string
 	Buff        *packets.Packet
 }
@@ -143,7 +143,7 @@ process:
 			}
 
 			if msg.ContainerID != "" {
-				tc.taggerState[string(*msg.Oob)] = msg.ContainerID
+				tc.taggerState[string(msg.Oob)] = msg.ContainerID
 			}
 
 			if tc.sharedPacketPoolManager != nil {
