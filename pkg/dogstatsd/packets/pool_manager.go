@@ -115,7 +115,15 @@ func (p *PoolManager) Flush() {
 	defer p.Unlock()
 
 	p.refs.Range(func(k, v interface{}) bool {
-		p.pool.Put(k)
+		var ref interface{}
+
+		switch v := k.(type) {
+		case *[]uint8:
+			ref = *v
+		default:
+			ref = v
+		}
+		p.pool.Put(ref)
 		p.refs.Delete(k)
 		return true
 	})
