@@ -55,8 +55,8 @@ func (p *PoolManager) Put(x interface{}) {
 	// avoid adding items to the map while flushing.
 	p.RLock()
 
-	log.Debugf("Processing type: %T", x)
 	ref := unsafe.Pointer(&x)
+	log.Debugf("Processing type: %T and reference: %v", x, ref)
 	// TODO: use LoadAndDelete when go 1.15 is introduced
 	_, loaded := p.refs.Load(ref)
 	if loaded {
