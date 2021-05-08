@@ -55,28 +55,15 @@ func (p *PoolManager) Put(x interface{}) {
 	// avoid adding items to the map while flushing.
 	p.RLock()
 
-	var ref interface{}
-
-	switch v := x.(type) {
-	case []uint8:
-		ref = unsafe.Pointer(&v)
-		log.Debugf("Processing type: %T", ref)
-	case *Packet:
-		ref = v
-		log.Debugf("Processing type: %T", ref)
-	default:
-		// unsupported type in manager, just put back
-		p.pool.Put(x)
-		return
-	}
-
+	log.Debugf("Processing type: %T", x)
+	ref := unsafe.Pointer(&x)
 	// TODO: use LoadAndDelete when go 1.15 is introduced
 	_, loaded := p.refs.Load(ref)
 	if loaded {
 		// reference exists, put back.
+		log.Debugf("Returning %v with type: %T to packet pool.", ref, x)
 		p.refs.Delete(ref)
 		p.pool.Put(x)
-		log.Debugf("Returning type: %T to packet pool.", x)
 	} else {
 		// reference does not exist, account.
 		p.refs.Store(ref, struct{}{})
