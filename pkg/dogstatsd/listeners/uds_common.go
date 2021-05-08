@@ -127,7 +127,8 @@ func NewUDSListener(packetOut chan packets.Packets, sharedPacketPoolManager *pac
 
 		pool := &sync.Pool{
 			New: func() interface{} {
-				return make([]byte, getUDSAncillarySize())
+				s := make([]byte, getUDSAncillarySize())
+				return &s
 			},
 		}
 
@@ -165,19 +166,20 @@ func (l *UDSListener) Listen() {
 
 		if l.OriginDetection {
 			// Read datagram + credentials in ancillary data
-			oob := l.oobPoolManager.Get().([]byte)
+			oob := l.oobPoolManager.Get().(*[]byte)
+			oobS := *oob
 			var oobn int
-			n, oobn, _, _, err = l.conn.ReadMsgUnix(packet.Buffer, oob)
+			n, oobn, _, _, err = l.conn.ReadMsgUnix(packet.Buffer, oobS)
 
 			// Extract container id from credentials
-			container, taggingErr := processUDSOrigin(oob[:oobn])
+			container, taggingErr := processUDSOrigin(oobS[:oobn])
 
 			if capBuff != nil {
 				capBuff.Pb.Timestamp = time.Now().Unix()
-				capBuff.Oob = &oob
+				capBuff.Oob = oob
 				capBuff.Buff = packet
 				capBuff.Pb.AncillarySize = int32(oobn)
-				capBuff.Pb.Ancillary = oob[:oobn] // or oob[:oobn] ?
+				capBuff.Pb.Ancillary = oobS[:oobn] // or oob[:oobn] ?
 				capBuff.Pb.PayloadSize = int32(n)
 				capBuff.Pb.Payload = packet.Buffer // or packet.Buffer[:n] ?
 			}
@@ -193,7 +195,7 @@ func (l *UDSListener) Listen() {
 				}
 			}
 			// Return the buffer back to the pool for reuse
-			l.oobPoolManager.Put(&oob)
+			l.oobPoolManager.Put(oob)
 		} else {
 			// Read only datagram contents with no credentials
 			n, _, err = l.conn.ReadFromUnix(packet.Buffer)
