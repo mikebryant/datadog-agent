@@ -47,6 +47,7 @@ func (p *PoolManager) Put(x interface{}) {
 
 	if p.IsPassthru() {
 		p.pool.Put(x)
+		log.Debugf("Passthuru, just returned: %v to packet pool.", x)
 		return
 	}
 
