@@ -8,6 +8,7 @@ package packets
 import (
 	"sync"
 	"sync/atomic"
+	"unsafe"
 
 	"github.com/DataDog/datadog-agent/pkg/util/log"
 )
@@ -58,7 +59,7 @@ func (p *PoolManager) Put(x interface{}) {
 
 	switch v := x.(type) {
 	case []uint8:
-		ref = &v
+		ref = unsafe.Pointer(&v)
 	default:
 		ref = v
 	}
