@@ -6,6 +6,7 @@
 package packets
 
 import (
+	"runtime/debug"
 	"sync"
 	"sync/atomic"
 	"unsafe"
@@ -67,6 +68,10 @@ func (p *PoolManager) Put(x interface{}) {
 	p.RLock()
 
 	log.Debugf("Processing type: %T and reference: %v", x, ref)
+	stack := debug.Stack()
+	for _, msg := range stack {
+		log.Debugf("Stacktrace: %s", msg)
+	}
 	// TODO: use LoadAndDelete when go 1.15 is introduced
 	_, loaded := p.refs.Load(ref)
 	if loaded {
