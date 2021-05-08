@@ -54,8 +54,7 @@ func (p *PoolManager) Put(x interface{}) {
 
 	var ref unsafe.Pointer
 	switch t := x.(type) {
-	case []byte:
-		ref = unsafe.Pointer(&t)
+	case *[]byte:
 	case *Packet:
 		ref = unsafe.Pointer(t)
 	default:

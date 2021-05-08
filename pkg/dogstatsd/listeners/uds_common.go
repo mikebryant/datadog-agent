@@ -174,7 +174,7 @@ func (l *UDSListener) Listen() {
 
 			if capBuff != nil {
 				capBuff.Pb.Timestamp = time.Now().Unix()
-				capBuff.Oob = oob
+				capBuff.Oob = &oob
 				capBuff.Buff = packet
 				capBuff.Pb.AncillarySize = int32(oobn)
 				capBuff.Pb.Ancillary = oob[:oobn] // or oob[:oobn] ?
@@ -193,7 +193,7 @@ func (l *UDSListener) Listen() {
 				}
 			}
 			// Return the buffer back to the pool for reuse
-			l.oobPoolManager.Put(oob)
+			l.oobPoolManager.Put(&oob)
 		} else {
 			// Read only datagram contents with no credentials
 			n, _, err = l.conn.ReadFromUnix(packet.Buffer)
