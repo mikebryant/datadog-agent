@@ -63,8 +63,6 @@ func (p *PoolManager) Put(x interface{}) {
 		ref = v
 	}
 
-	log.Debugf("Putting back interface: %v and reference: %v\n", x, ref)
-
 	// TODO: use LoadAndDelete when go 1.15 is introduced
 	_, loaded := p.refs.Load(ref)
 	if loaded {
