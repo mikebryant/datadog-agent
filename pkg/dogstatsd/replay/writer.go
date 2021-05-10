@@ -175,9 +175,17 @@ cleanup:
 			break cleanup
 		}
 	}
+
+	n, err := tc.WriteState()
+	if err != nil {
+		log.Warnf("There was an issue writing the capture state, capture file may be corrupt: %v", err)
+	} else {
+		log.Warnf("Wrote %d bytes for capture tagger state", n)
+	}
+
 }
 
-// StopCapture stops the ongoing capture if ongoine and returns an error, if any.
+// StopCapture stops the ongoing capture if in process and returns an error, if any.
 func (tc *TrafficCaptureWriter) StopCapture() error {
 	tc.Lock()
 	defer tc.Unlock()
@@ -200,13 +208,6 @@ func (tc *TrafficCaptureWriter) StopCapture() error {
 
 	close(tc.shutdown)
 	tc.ongoing = false
-
-	n, err := tc.WriteState()
-	if err != nil {
-		log.Warnf("There was an issue writing the capture state, capture file may be corrupt: %v", err)
-	} else {
-		log.Warnf("Wrote %d bytes for capture tagger state", n)
-	}
 
 	log.Debug("Capture was stopped")
 	return tc.File.Close()
