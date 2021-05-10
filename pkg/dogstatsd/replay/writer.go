@@ -201,6 +201,13 @@ func (tc *TrafficCaptureWriter) StopCapture() error {
 	close(tc.shutdown)
 	tc.ongoing = false
 
+	n, err := tc.WriteState()
+	if err != nil {
+		log.Warnf("There was an issue writing the capture state, capture file may be corrupt: %v", err)
+	} else {
+		log.Warnf("Wrote %d bytes for capture tagger state", n)
+	}
+
 	log.Debug("Capture was stopped")
 	return tc.File.Close()
 }
