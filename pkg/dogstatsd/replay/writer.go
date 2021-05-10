@@ -283,6 +283,8 @@ func (tc *TrafficCaptureWriter) WriteState() (int, error) {
 	}
 	tc.RUnlock()
 
+	log.Debugf("Going to write STATE: %v", pbState)
+
 	s, err := proto.Marshal(&pbState)
 	if err != nil {
 		return 0, err
