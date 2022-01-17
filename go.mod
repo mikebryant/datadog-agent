@@ -164,7 +164,7 @@ require (
 	github.com/tinylib/msgp v1.1.2
 	github.com/tklauser/go-sysconf v0.3.4 // indirect
 	github.com/ttacon/chalk v0.0.0-20160626202418-22c06c80ed31 // indirect
-	github.com/twmb/murmur3 v1.1.3
+	github.com/twmb/murmur3 v1.1.6
 	github.com/ulikunitz/xz v0.5.10 // indirect
 	github.com/urfave/negroni v1.0.0
 	github.com/vishvananda/netlink v1.1.1-0.20201206203632-88079d98e65d
